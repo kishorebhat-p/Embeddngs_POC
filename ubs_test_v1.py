@@ -25,7 +25,7 @@ import tiktoken
 openai.api_type = "azure"
 openai.api_base = "https://openai-pocfsstar.openai.azure.com/"
 openai.api_version = "2022-12-01"
-os.environ["OPENAI_API_KEY"] = "b8ce78e2c7954089b27c6045c799bb0d"
+os.environ["OPENAI_API_KEY"] = "************************"
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
