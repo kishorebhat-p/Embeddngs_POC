@@ -7,7 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/1QLjxzYchD6cIzbNb2zid_oXXodTBTloY
 """
 
-!pip install openai num2words matplotlib plotly scipy scikit-learn pandas tiktoken
+#!pip install openai num2words matplotlib plotly scipy scikit-learn pandas tiktoken
 
 import openai
 import os
@@ -31,9 +31,8 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 
-df=pd.read_excel('/content/AppInventory_Sample_0822.xlsx')
+df=pd.read_excel('./AppInventory_Sample_0822.xlsx')
 
-df.head()
 
 import re
 def normalize_text(s, sep_token = " \n "):
@@ -45,40 +44,27 @@ def normalize_text(s, sep_token = " \n "):
     s = s.replace("\n", "")
     s = s.replace("-", "")
     s = s.strip()
-
     return s
 
 df['Software Description']= df['Software Description'].apply(lambda x : normalize_text(x))
-len(df)
 
 tokenizer = tiktoken.get_encoding("cl100k_base")
 df['n_tokens'] = df['Software Description'].apply(lambda x: len(tokenizer.encode(x)))
-df = df[df.n_tokens<500]
-len(df)
+#df = df[df.n_tokens<500]
+print("lenght of array")
+print(len(df))
+print("done")
 
-sample_encode = tokenizer.encode(df['Software Description'][0])
-decode = tokenizer.decode_tokens_bytes(sample_encode)
-len(decode)
+#df = df.head(3)
 
-df['ada_v2'] = df['Software Description'].apply(lambda x : get_embedding(x, engine = 'text-embedding-ada-002'))
-
-df.to_excel("AppInventory_Embeddings.xlsx")
-
-
-
-df_clone=df
-
-# search through the reviews for a specific product
-top_n=5
-for i in range(len(df_clone)):
-  tosearch=df_clone.loc[i,'Software Description']
-  embedding=df_clone.loc[i,'ada_v2']
-  identifier=df_clone.loc[i,'IDENTIFIER']
-  df["similarities"] = df.ada_v2.apply(lambda x: cosine_similarity(x, embedding))
-   res = (
-        df.sort_values("similarities", ascending=False).head(top_n)
-  )
-  print(" \n ===============================================================\n")
-  print ("for Identifier" ,  identifier , " : ")
-  display(res)
-  print(" \n ===============================================================\n")
+import time
+results = []
+for ind in df.index:
+   text=df['Software Description'][ind]
+   embed = get_embedding(text, engine = 'star-embedding-ada')
+   filename= "./persistnpy/" + str(df['IDENTIFIER'][ind]) + ".txt"
+   embed = get_embedding(text, engine = 'star-embedding-ada')
+   np.save(filename,embed)
+   results.append(embed)
+   time.sleep(3)
+   print("Done with " + str(ind))
