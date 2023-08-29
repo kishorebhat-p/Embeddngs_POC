@@ -12,6 +12,7 @@ Original file is located at
 
 import openai
 import os
+import re
 import pandas as pd
 import numpy as np
 from openai.embeddings_utils import get_embedding, cosine_similarity
@@ -37,13 +38,14 @@ for i in range(len(df)):
     softdesc=df.loc[i,'Software Description']
     appname=df.loc[i,'App Name']
     df["similarities"] = df.embedding.apply(lambda x: cosine_similarity(x, embedding))
-    df1 = df.sort_values("similarities", ascending=False).head(top_n)
-    df1=df1[df1.IDENTIFIER != identifier]
-    df1['FROM_IDENTIFIER']=identifier
-    df1['FROM_SOFT_DESC']=softdesc
-    df1['FROM_APP_NAME']=appname
-    df1=df1.drop(columns=['embedding'])
-    total_df = pd.concat([total_df,df1])
+    df1 = df[df["similarities"] > 0.89]
+    if df1.empty == False:
+      df1=df1[df1.IDENTIFIER != identifier]
+      df1['FROM_IDENTIFIER']=identifier
+      df1['FROM_SOFT_DESC']=softdesc
+      df1['FROM_APP_NAME']=appname
+      df1=df1.drop(columns=['embedding'])
+      total_df = pd.concat([total_df,df1])
 
 #total_df.to_excel("./similarity/consolidated_data.xlsx")
 
