@@ -35,12 +35,28 @@ for i in range(len(df)):
     identifier=df.loc[i,'IDENTIFIER']
     embedding=df.loc[i,'embedding']
     softdesc=df.loc[i,'Software Description']
+    appname=df.loc[i,'App Name']
     df["similarities"] = df.embedding.apply(lambda x: cosine_similarity(x, embedding))
     df1 = df.sort_values("similarities", ascending=False).head(top_n)
     df1=df1[df1.IDENTIFIER != identifier]
     df1['FROM_IDENTIFIER']=identifier
     df1['FROM_SOFT_DESC']=softdesc
+    df1['FROM_APP_NAME']=appname
     df1=df1.drop(columns=['embedding'])
     total_df = pd.concat([total_df,df1])
 
-total_df.to_excel("./similarity/consolidated_data.xlsx")
+#total_df.to_excel("./similarity/consolidated_data.xlsx")
+
+def getgroupValue(data1,data2):
+  intOne=int(re.findall(r'\d+', data1)[0])
+  inttwo=int(re.findall(r'\d+', data2)[0])
+  retVal=""
+  if(intOne>inttwo):
+    retVal=str(inttwo) + "_" + str(intOne)
+  else:
+    retVal=str(intOne) + "_" + str(inttwo)
+  return retVal
+
+total_df['groupid'] = total_df.apply(lambda x: getgroupValue(x.FROM_IDENTIFIER, x.IDENTIFIER), axis=1)
+cleared_data=total_df.drop_duplicates(subset=['groupid'])
+cleared_data.to_excel('./similarity/consolidated_data_v3.xlsx')
